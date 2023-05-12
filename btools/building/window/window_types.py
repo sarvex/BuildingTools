@@ -211,7 +211,7 @@ def make_window_inset(bm, face, prop):
 def merge_loose_split_verts(bm, window_face, prop):
     """ Merge the split verts to the corners of the window frame"""
     median = window_face.calc_center_median()
-    window_face_verts = [v for v in window_face.verts]
+    window_face_verts = list(window_face.verts)
     for vert in window_face_verts:
         extent_edge = [e for e in vert.link_edges if e not in window_face.edges].pop()
         corner_vert = extent_edge.other_vert(vert)

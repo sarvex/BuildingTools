@@ -14,7 +14,7 @@ from btools.building.floorplan.floorplan_ops import build as floorplan_builder
 @contextmanager
 def select_top_faces():
     with btools.utils.bmesh_from_active_object(bpy.context) as bm:
-        max_z = max([f.calc_center_median().z for f in bm.faces])
+        max_z = max(f.calc_center_median().z for f in bm.faces)
         top_faces = [f for f in bm.faces if f.calc_center_median().z == max_z]
         btools.utils.select(top_faces)
 

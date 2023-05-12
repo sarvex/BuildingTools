@@ -127,7 +127,7 @@ def filter_vertical_edges(edges):
     In 2D space(XY Plane), vertical is Y-axis, In 3D, vertical is Z-axis
     """
     rnd = ft.partial(round, ndigits=3)
-    space_2d = len(set(rnd(v.co.z) for e in edges for v in e.verts)) == 1
+    space_2d = len({rnd(v.co.z) for e in edges for v in e.verts}) == 1
     if space_2d:
         return list(filter(lambda e: abs(rnd(edge_vector(e).y)) == 1.0, edges))
 
@@ -148,7 +148,7 @@ def filter_horizontal_edges(edges):
     In 2D space(XY Plane), horizontal is X-axis, In 3D, horizontal is XY-plane
     """
     rnd = ft.partial(round, ndigits=3)
-    space_2d = len(set(rnd(v.co.z) for e in edges for v in e.verts)) == 1
+    space_2d = len({rnd(v.co.z) for e in edges for v in e.verts}) == 1
     if space_2d:
         return list(filter(lambda e: abs(rnd(edge_vector(e).x)) == 1.0, edges))
 
@@ -316,8 +316,7 @@ def closest_faces(faces, locations):
 def get_selected_face_dimensions(context):
     """Get dimensions of selected face"""
     bm = bmesh.from_edit_mesh(context.edit_object.data)
-    wall = [f for f in bm.faces if f.select]
-    if wall:
+    if wall := [f for f in bm.faces if f.select]:
         return calc_face_dimensions(wall[0])
     return 1, 1
 

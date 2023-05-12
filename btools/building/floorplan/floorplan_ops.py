@@ -45,8 +45,8 @@ class BTOOLS_OT_add_floorplan(bpy.types.Operator):
 
 @crash_safe
 def build(context, prop):
-    name = "building_" + str("{:0>3}".format(len(bpy.data.objects) + 1))
-    obj = create_object(name, create_mesh(name + "_mesh"))
+    name = "building_" + "{:0>3}".format(len(bpy.data.objects) + 1)
+    obj = create_object(name, create_mesh(f"{name}_mesh"))
 
     bm = bm_from_obj(obj)
     if prop.type == "RECTANGULAR":

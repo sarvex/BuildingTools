@@ -3,7 +3,7 @@ from functools import wraps
 class Events:
 
     def __init__(self, events):
-        self.subscribers = {e:list() for e in events}
+        self.subscribers = {e: [] for e in events}
 
     def get_subscribers(self, event):
         return self.subscribers.get(event, None)

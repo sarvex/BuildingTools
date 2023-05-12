@@ -60,7 +60,7 @@ def get_bounding_verts(faces):
     verts = list({v for f in faces for v in f.verts})
     edges = list({e for f in faces for e in f.edges})
     min_z, max_z = minmax(verts, key=lambda v: v.co.z)
-    bound_verts = [v for v in verts if v.co.z == max_z.co.z or v.co.z == min_z.co.z]
+    bound_verts = [v for v in verts if v.co.z in [max_z.co.z, min_z.co.z]]
 
     corner_verts, mid_verts = [], []
     for v in bound_verts:

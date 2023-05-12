@@ -35,7 +35,6 @@ class TestUtilsCommon(unittest.TestCase):
         @btools.utils.crash_safe
         def run_failed():
             raise IndexError
-            return {"FINISHED"}
 
         @btools.utils.crash_safe
         def run_passed():
@@ -250,7 +249,7 @@ class TestUtilsMesh(unittest.TestCase):
     def test_edgevector(self):
         btools.utils.plane(self.bm)
         ev = btools.utils.edge_vector
-        self.assertEqual(sum([ev(e) for e in self.bm.edges], Vector()), Vector())
+        self.assertEqual(sum((ev(e) for e in self.bm.edges), Vector()), Vector())
 
     def test_edgeslope(self):
         btools.utils.plane(self.bm)
@@ -313,7 +312,7 @@ class TestUtilsMesh(unittest.TestCase):
 
         self.assertFalse(btools.utils.valid_ngon(list(self.bm.faces).pop()))
 
-        v = random.choice([v for v in self.bm.verts])
+        v = random.choice(list(self.bm.verts))
         v.co += Vector((random.random() * 19, random.random() * 5, 0))
         self.assertFalse(btools.utils.is_rectangle(list(self.bm.faces).pop()))
 

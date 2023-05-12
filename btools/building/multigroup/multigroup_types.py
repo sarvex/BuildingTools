@@ -223,15 +223,18 @@ def make_multigroup_insets(bm, face, prop, dws):
 
 
 def clubbed_width(width, frame_thickness, type, count, first=False, last=False):
-    if type == "door":
+    if (
+        type != "door"
+        and type == "window"
+        and first
+        and last
+        or type == "door"
+    ):
         return (width * count) + (frame_thickness * (count + 1))
+    elif type == "window" and (first or last):
+        return (width * count) + (frame_thickness * count)
     elif type == "window":
-        if first and last:
-            return (width * count) + (frame_thickness * (count + 1))
-        elif first or last:
-            return (width * count) + (frame_thickness * count)
-        else:
-            return (width * count) + (frame_thickness * (count - 1))
+        return (width * count) + (frame_thickness * (count - 1))
 
 
 def make_window_insets(bm, face, count, window_height, window_width, frame_thickness, first=False, last=False):
@@ -289,12 +292,11 @@ def parse_components(components):
     for c in components:
         if c == previous:
             dws[-1]["count"] += 1
+        elif char_to_type.get(c):
+            dws.append({"type": char_to_type.get(c), "count": 1})
+            previous = c
         else:
-            if char_to_type.get(c):
-                dws.append({"type": char_to_type.get(c), "count": 1})
-                previous = c
-            else:
-                raise Exception("Unsupported component: {}".format(c))
+            raise Exception(f"Unsupported component: {c}")
     return dws
 
 
@@ -303,9 +305,9 @@ def merge_loose_split_verts(bm, window_faces, door_faces, prop):
 
     components = prop.components
     num_components = len(components)    
-    
+
     for idx, wf in enumerate(window_faces):
-        window_face_verts = [v for v in wf.verts]
+        window_face_verts = list(wf.verts)
 
         # -- determine if this window is on the extreme left or right
         is_extreme_left, is_extreme_right = (
@@ -334,7 +336,7 @@ def merge_loose_split_verts(bm, window_faces, door_faces, prop):
             vert_dir = XYDir(vert.co - median).to_tuple(2)
             if (is_extreme_right and vert_dir == face_right) or (is_extreme_left and vert_dir == face_left):
                 move_factor = 1.0
-                
+
             move_mag = prop.frame_thickness * move_factor
             move_dir = XYDir(corner_vert.co - median)
             bmesh.ops.translate(bm, verts=[corner_vert], vec=move_dir * move_mag)
@@ -365,7 +367,7 @@ def merge_loose_split_verts(bm, window_faces, door_faces, prop):
             vert_dir = XYDir(vert.co - median).to_tuple(2)
             if (is_extreme_right and vert_dir == face_right) or (is_extreme_left and vert_dir == face_left):
                 move_factor = 1.0
-                
+
             move_mag = prop.frame_thickness * move_factor
             move_dir = XYDir(corner_vert.co - median)
             bmesh.ops.translate(bm, verts=[corner_vert], vec=move_dir * move_mag)

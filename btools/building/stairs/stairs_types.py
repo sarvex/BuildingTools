@@ -243,9 +243,9 @@ def post_process_railing(bm, railing, prop):
     if prop.rail.fill == "WALL" and not prop.rail.bottom_rail:
         for wall in fill:
 
-            # XXX check if any of the wall edges are sloped
-            sloped_edges = [e for f in wall for e in f.edges if edge_is_sloped(e)]
-            if sloped_edges:
+            if sloped_edges := [
+                e for f in wall for e in f.edges if edge_is_sloped(e)
+            ]:
                 # -- translate bottom edges down by step height
                 srted = sort_edges(sloped_edges, VEC_UP)
                 bottom = srted[: len(srted) // 2]

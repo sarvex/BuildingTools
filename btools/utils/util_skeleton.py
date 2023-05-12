@@ -27,15 +27,14 @@ class Vector2:
     def __eq__(self, other):
         if isinstance(other, Vector2):
             return self.x == other.x and self.y == other.y
-        else:
-            assert hasattr(other, "__len__") and len(other) == 2
-            return self.x == other[0] and self.y == other[1]
+        assert hasattr(other, "__len__") and len(other) == 2
+        return self.x == other[0] and self.y == other[1]
 
     def __ne__(self, other):
         return not self.__eq__(other)
 
     def __nonzero__(self):
-        return bool(self.x != 0 or self.y != 0)
+        return self.x != 0 or self.y != 0
 
     def __len__(self):
         return 2
@@ -53,7 +52,7 @@ class Vector2:
 
     def __getattr__(self, name):
         try:
-            return tuple([(self.x, self.y)["xy".index(c)] for c in name])
+            return tuple((self.x, self.y)["xy".index(c)] for c in name)
         except ValueError:
             raise AttributeError(name)
 
@@ -62,10 +61,7 @@ class Vector2:
             # Vector + Vector -> Vector
             # Vector + Point -> Point
             # Point + Point -> Vector
-            if self.__class__ is other.__class__:
-                _class = Vector2
-            else:
-                _class = Point2
+            _class = Vector2 if self.__class__ is other.__class__ else Point2
             return _class(self.x + other.x, self.y + other.y)
         else:
             assert hasattr(other, "__len__") and len(other) == 2
@@ -84,10 +80,7 @@ class Vector2:
 
     def __sub__(self, other):
         if isinstance(other, Vector2):
-            if self.__class__ is other.__class__:
-                _class = Vector2
-            else:
-                _class = Point2
+            _class = Vector2 if self.__class__ is other.__class__ else Point2
             return _class(self.x - other.x, self.y - other.y)
         else:
             assert hasattr(other, "__len__") and len(other) == 2
@@ -96,9 +89,8 @@ class Vector2:
     def __rsub__(self, other):
         if isinstance(other, Vector2):
             return Vector2(other.x - self.x, other.y - self.y)
-        else:
-            assert hasattr(other, "__len__") and len(other) == 2
-            return Vector2(other.x - self[0], other.y - self[1])
+        assert hasattr(other, "__len__") and len(other) == 2
+        return Vector2(other.x - self[0], other.y - self[1])
 
     def __mul__(self, other):
         assert type(other) in (int, float)
@@ -154,15 +146,13 @@ class Vector2:
         return self.x ** 2 + self.y ** 2
 
     def normalize(self):
-        d = self.magnitude()
-        if d:
+        if d := self.magnitude():
             self.x /= d
             self.y /= d
         return self
 
     def normalized(self):
-        d = self.magnitude()
-        if d:
+        if d := self.magnitude():
             return Vector2(self.x / d, self.y / d)
         return self.copy()
 
@@ -191,13 +181,11 @@ class Vector2:
 
 class Geometry:
     def _connect_unimplemented(self, other):
-        raise AttributeError(
-            "Cannot connect %s to %s" % (self.__class__, other.__class__)
-        )
+        raise AttributeError(f"Cannot connect {self.__class__} to {other.__class__}")
 
     def _intersect_unimplemented(self, other):
         raise AttributeError(
-            "Cannot intersect %s and %s" % (self.__class__, other.__class__)
+            f"Cannot intersect {self.__class__} and {other.__class__}"
         )
 
     _intersect_point2 = _intersect_unimplemented
@@ -212,10 +200,7 @@ class Geometry:
         raise NotImplementedError
 
     def distance(self, other):
-        c = self.connect(other)
-        if c:
-            return c.length
-        return 0.0
+        return c.length if (c := self.connect(other)) else 0.0
 
 
 def _intersect_line2_line2(A, B):
@@ -229,10 +214,7 @@ def _intersect_line2_line2(A, B):
     if not A._u_in(ua):
         return None
     ub = (A.v.x * dy - A.v.y * dx) / d
-    if not B._u_in(ub):
-        return None
-
-    return Point2(A.p.x + ua * A.v.x, A.p.y + ua * A.v.y)
+    return Point2(A.p.x + ua * A.v.x, A.p.y + ua * A.v.y) if B._u_in(ub) else None
 
 
 def _connect_point2_line2(P, L):
@@ -248,7 +230,7 @@ def _connect_line2_line2(A, B):
     d = B.v.y * A.v.x - B.v.x * A.v.y
     if d == 0:
         # Parallel, connect an endpoint with a line
-        if isinstance(B, Ray2) or isinstance(B, LineSegment2):
+        if isinstance(B, (Ray2, LineSegment2)):
             p1, p2 = _connect_point2_line2(B.p, A)
             return p2, p1
         # No endpoint (or endpoint is on A), possibly choose arbitrary point
@@ -295,8 +277,7 @@ class Point2(Vector2, Geometry):
         return LineSegment2(other, self)
 
     def _connect_line2(self, other):
-        c = _connect_point2_line2(self, other)
-        if c:
+        if c := _connect_point2_line2(self, other):
             return c._swap()
 
 
@@ -420,8 +401,7 @@ def window(lst):
 
 
 def cross(a, b):
-    res = a.x * b.y - b.x * a.y
-    return res
+    return a.x * b.y - b.x * a.y
 
 
 def approximately_equals(a, b):
@@ -452,9 +432,7 @@ class SplitEvent(
     __slots__ = ()
 
     def __str__(self):
-        return "{} Split event @ {} from {} to {}".format(
-            self.distance, self.intersection_point, self.vertex, self.opposite_edge
-        )
+        return f"{self.distance} Split event @ {self.intersection_point} from {self.vertex} to {self.opposite_edge}"
 
 
 # -- Event Type (etype) is 0
@@ -464,9 +442,7 @@ class EdgeEvent(
     __slots__ = ()
 
     def __str__(self):
-        return "{} Edge event @ {} between {} and {}".format(
-            self.distance, self.intersection_point, self.vertex_a, self.vertex_b
-        )
+        return f"{self.distance} Edge event @ {self.intersection_point} between {self.vertex_a} and {self.vertex_b}"
 
 
 OriginalEdge = namedtuple("_OriginalEdge", "edge bisector_left, bisector_right")
@@ -510,7 +486,7 @@ class LAVertex:
         events = []
         if self.is_reflex:
             for edge in self.original_edges:
-                if edge.edge == self.edge_left or edge.edge == self.edge_right:
+                if edge.edge in [self.edge_left, self.edge_right]:
                     continue
 
                 leftdot = abs(
@@ -583,11 +559,9 @@ class LAVertex:
         if not events:
             return None
 
-        ev = min(
+        return min(
             events, key=lambda event: self.point.distance(event.intersection_point)
         )
-
-        return ev
 
     def invalidate(self):
         if self.lav is not None:
@@ -635,8 +609,7 @@ class SLAV:
         ]
 
     def __iter__(self):
-        for lav in self._lavs:
-            yield lav
+        yield from self._lavs
 
     def __len__(self):
         return len(self._lavs)
@@ -679,7 +652,7 @@ class SLAV:
             if len_sinks == 2 and len_diff == 0:
                 midpoint = sum(sinks, (0, 0)) / 2
             elif len_sinks == 3 and len_diff == 1:
-                new_sinks = [s for s in sinks]
+                new_sinks = list(sinks)
                 new_sinks.remove(set_diff.pop())
                 midpoint = sum(new_sinks, (0, 0)) / 2
 
@@ -728,9 +701,8 @@ class SLAV:
 
                 if xleft and xright:
                     break
-                else:
-                    x = None
-                    y = None
+                x = None
+                y = None
 
         if x is None:
             return (None, [])
@@ -845,10 +817,10 @@ class LAV:
         return replacement
 
     def __str__(self):
-        return "LAV {}".format(id(self))
+        return f"LAV {id(self)}"
 
     def __repr__(self):
-        return "{} = {}".format(str(self), [vertex for vertex in self])
+        return f"{str(self)} = {list(self)}"
 
     def __len__(self):
         return self._len

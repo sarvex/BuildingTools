@@ -18,7 +18,7 @@ def create_object_material(obj, mat_name):
         if bpy.data.materials.get(mat_name, None):
             # XXX if material with this name already exists in another object
             # append the object name to this material name
-            mat_name += ".{}".format(obj.name)
+            mat_name += f".{obj.name}"
 
         mat = bpy.data.materials.new(mat_name)
         link_material(obj, mat)
@@ -29,7 +29,7 @@ def create_object_material(obj, mat_name):
 def uv_map_active_editmesh_selection(faces, method):
     """perform uv mapping on `faces` using the provided `method`"""
     # -- ensure we are in editmode
-    if not bpy.context.object.mode == "EDIT":
+    if bpy.context.object.mode != "EDIT":
         return
 
     # -- if faces are not selected, do selection

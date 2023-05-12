@@ -56,8 +56,4 @@ def add_balcony_facemaps():
 
 
 def validate_balcony_faces(faces):
-    if faces:
-        # -- ensure none are upward facing
-        if not any([round(f.normal.z, 1) for f in faces]):
-            return True
-    return False
+    return bool(faces and not any(round(f.normal.z, 1) for f in faces))

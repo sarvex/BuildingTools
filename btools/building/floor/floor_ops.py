@@ -52,12 +52,11 @@ def build(context, prop):
 
     if validate_floor_faces(bm):
         add_floor_facemaps(context, prop)
-        selected_faces = [f for f in bm.faces if f.select]
-        if selected_faces:
+        if selected_faces := [f for f in bm.faces if f.select]:
             create_floors(bm, selected_faces, prop)
             select(bm.faces, False)
         else:
-            all_faces = [f for f in bm.faces]
+            all_faces = list(bm.faces)
             create_floors(bm, all_faces, prop)
         bmesh.update_edit_mesh(me, loop_triangles=True)
         return {"FINISHED"}
@@ -77,7 +76,7 @@ def add_floor_facemaps(context, prop):
 
 
 def validate_floor_faces(bm):
-    if any([f for f in bm.faces if f.select]):
+    if any(f for f in bm.faces if f.select):
         selection = [f for f in bm.faces if f.select]
         if len({round(v.co.z, 4) for f in selection for v in f.verts}) == 1:
             return True

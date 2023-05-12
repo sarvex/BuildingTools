@@ -93,10 +93,7 @@ class BTOOLS_PT_material_tools(bpy.types.Panel):
         ob = context.object
         facemap = ob.face_maps.active
 
-        rows = 2
-        if facemap:
-            rows = 4
-
+        rows = 4 if facemap else 2
         if not len(ob.face_maps):
             return
 
@@ -112,18 +109,18 @@ class BTOOLS_PT_material_tools(bpy.types.Panel):
         col.separator()
         col.operator("btools.face_map_clear", icon="TRASH", text="")
 
-        if ob.face_maps and (ob.mode == "EDIT" and ob.type == "MESH"):
-            row = layout.row()
-
-            sub = row.row(align=True)
-            sub.operator("object.face_map_assign", text="Assign")
-            sub.operator("object.face_map_remove_from", text="Remove")
-
-            sub = row.row(align=True)
-            sub.operator("object.face_map_select", text="Select")
-            sub.operator("object.face_map_deselect", text="Deselect")
-
         if ob.face_maps:
+            if (ob.mode == "EDIT" and ob.type == "MESH"):
+                row = layout.row()
+
+                sub = row.row(align=True)
+                sub.operator("object.face_map_assign", text="Assign")
+                sub.operator("object.face_map_remove_from", text="Remove")
+
+                sub = row.row(align=True)
+                sub.operator("object.face_map_select", text="Select")
+                sub.operator("object.face_map_deselect", text="Deselect")
+
             face_map_index = ob.face_maps.active_index
             face_map_material = ob.facemap_materials[face_map_index]
 

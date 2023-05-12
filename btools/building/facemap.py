@@ -13,7 +13,7 @@ from ..utils import (
 
 
 class AutoIndex(Enum):
-    def _generate_next_value_(name, start, count, last_values):
+    def _generate_next_value_(self, start, count, last_values):
         return count
 
 
@@ -94,7 +94,7 @@ def add_faces_to_map(bm, faces, group, skip=None):
     def remove_skipped(f):
         if skip:
             skip_index = face_map_index_from_name(skip.name.lower())
-            return not (f[face_map] == skip_index)
+            return f[face_map] != skip_index
         return True
 
     for face in list(filter(remove_skipped, faces)):
@@ -169,10 +169,14 @@ def clear_material_for_active_facemap(context):
 
 def face_map_index_from_name(name):
     """Get the index of a facemap from its name"""
-    for _, fmap in bpy.context.object.face_maps.items():
-        if fmap.name == name:
-            return fmap.index
-    return -1
+    return next(
+        (
+            fmap.index
+            for _, fmap in bpy.context.object.face_maps.items()
+            if fmap.name == name
+        ),
+        -1,
+    )
 
 
 def clear_empty_facemaps(context):
@@ -197,9 +201,5 @@ def clear_empty_facemaps(context):
 
 def find_faces_without_facemap(bm):
     """Find all the faces in bm that don't belong to any facemap"""
-    result = []
     face_map = bm.faces.layers.face_map.active
-    for f in bm.faces:
-        if f[face_map] < 0:
-            result.append(f)
-    return result
+    return [f for f in bm.faces if f[face_map] < 0]

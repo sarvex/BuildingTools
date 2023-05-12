@@ -45,8 +45,9 @@ def build(context, props):
     verify_facemaps_for_object(context.object)
     me = get_edit_mesh()
     bm = bmesh.from_edit_mesh(me)
-    faces = validate_multigroup_faces([face for face in bm.faces if face.select])
-    if faces:
+    if faces := validate_multigroup_faces(
+        [face for face in bm.faces if face.select]
+    ):
         add_multigroup_facemaps()
         if create_multigroup(bm, faces, props):
             bmesh.update_edit_mesh(me, loop_triangles=True)
@@ -65,6 +66,4 @@ def validate_multigroup_faces(faces):
     """ Filter out invalid faces """
     # -- remove upward facing faces
     faces = list(filter(lambda f: abs(round(f.normal.z, 3)) == 0.0, faces))
-    # -- remove non-rectangular faces
-    faces = list(filter(lambda f: is_rectangle(f), faces))
-    return faces
+    return list(filter(lambda f: is_rectangle(f), faces))

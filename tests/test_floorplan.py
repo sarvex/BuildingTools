@@ -151,7 +151,7 @@ class TestFloorplan(unittest.TestCase):
         prop = context.scene.test_prop
 
         prop.type = "RANDOM"
-        for s in range(100):
+        for _ in range(100):
             prop.seed = random.randrange(0, 10000)
             res = build(context, prop)
             self.assertIsNotNone(res)

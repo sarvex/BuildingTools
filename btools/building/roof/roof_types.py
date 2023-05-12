@@ -84,14 +84,14 @@ def create_gable_roof(bm, faces, prop):
     original_edges = validate(face.edges)
 
     # -- get verts in anti-clockwise order (required by straight skeleton)
-    verts = [v for v in sort_verts_by_loops(face)]
+    verts = list(sort_verts_by_loops(face))
     points = [v.co.to_tuple()[:2] for v in verts]
 
     # -- compute straight skeleton
     skeleton = skeletonize(points, [], zero_gradient=True)
     bmesh.ops.delete(bm, geom=faces, context="FACES_ONLY")
 
-    height_scale = prop.height / max([arc.height for arc in skeleton])
+    height_scale = prop.height / max(arc.height for arc in skeleton)
 
     # -- create edges and vertices
     skeleton_edges = create_skeleton_verts_and_edges(
@@ -119,14 +119,14 @@ def create_hip_roof(bm, faces, prop):
     original_edges = validate(face.edges)
 
     # -- get verts in anti-clockwise order
-    verts = [v for v in sort_verts_by_loops(face)]
+    verts = list(sort_verts_by_loops(face))
     points = [v.co.to_tuple()[:2] for v in verts]
 
     # -- compute straight skeleton
     skeleton = skeletonize(points, [])
     bmesh.ops.delete(bm, geom=faces, context="FACES_ONLY")
 
-    height_scale = prop.height / max([arc.height for arc in skeleton])
+    height_scale = prop.height / max(arc.height for arc in skeleton)
 
     # -- create edges and vertices
     skeleton_edges = create_skeleton_verts_and_edges(
@@ -155,16 +155,13 @@ def vert_at_loc(loc, verts, loc_z=None):
     results = []
     for vert in verts:
         co = vert.co
-        if equal(co.x, loc.x) and equal(co.y, loc.y):
-            if loc_z:
-                if equal(co.z, loc_z):
-                    results.append(vert)
-            else:
-                results.append(vert)
-
-    if results:
-        return max([v for v in results], key=lambda v: v.co.z)
-    return None
+        if (
+            equal(co.x, loc.x)
+            and equal(co.y, loc.y)
+            and (loc_z and equal(co.z, loc_z) or not loc_z)
+        ):
+            results.append(vert)
+    return max(list(results), key=lambda v: v.co.z) if results else None
 
 
 def create_skeleton_verts_and_edges(bm, skeleton, original_edges, median, height_scale):
@@ -184,7 +181,7 @@ def create_skeleton_verts_and_edges(bm, skeleton, original_edges, median, height
         for sink in arc.sinks:
             vs = vert_at_loc(sink, O_verts + skeleton_verts)
             if not vs:
-                sink_height = min([arc.height for arc in skeleton if sink in arc.sinks])
+                sink_height = min(arc.height for arc in skeleton if sink in arc.sinks)
                 ht = height_scale * sink_height
                 vs = make_vert(bm, Vector((sink.x, sink.y, median.z + ht)))
             skeleton_verts.append(vs)
@@ -305,7 +302,7 @@ def join_intersections_and_get_skeleton_edges(bm, skeleton_verts, skeleton_edges
     new_verts = join_intersecting_verts_and_edges(bm, skeleton_edges, skeleton_verts)
     skeleton_verts = validate(skeleton_verts) + new_verts
     bmesh.ops.remove_doubles(bm, verts=skeleton_verts, dist=0.0001)
-    return list(set(e for v in validate(skeleton_verts) for e in v.link_edges))
+    return list({e for v in validate(skeleton_verts) for e in v.link_edges})
 
 
 def dissolve_lone_verts(bm, face, original_edges):
@@ -354,7 +351,7 @@ def gable_process_open(bm, roof_faces, prop):
     for e in [ed for f in new_faces for ed in f.edges]:
         link_faces = e.link_faces
         len_valid = len(link_faces) == 2
-        link_valid = sum([f in new_faces for f in link_faces]) == 1
+        link_valid = sum(f in new_faces for f in link_faces) == 1
 
         if len_valid and link_valid:
             side_faces.extend(set(link_faces) - set(new_faces))
@@ -376,9 +373,9 @@ def gable_process_open(bm, roof_faces, prop):
         v_edges.extend(list(filter(edge_is_vertical, f.edges)))
 
     # -- find ones with lowest z
-    min_z = min([calc_edge_median(e).z for e in v_edges])
+    min_z = min(calc_edge_median(e).z for e in v_edges)
     min_z_edges = [e for e in v_edges if calc_edge_median(e).z == min_z]
-    min_z_verts = list(set(v for e in min_z_edges for v in e.verts))
+    min_z_verts = list({v for e in min_z_edges for v in e.verts})
     bmesh.ops.translate(bm, verts=min_z_verts, vec=(0, 0, -prop.outset / 2))
 
     # -- post cleanup

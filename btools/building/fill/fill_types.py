@@ -94,11 +94,6 @@ def validate_fill_props(prop, dw):
         fill = get_fill(prop, "bar_fill", dw)
         depth = getattr(prop, "door_depth", getattr(prop, "window_depth", getattr(prop, "dw_depth", 1e10)))
         fill.bar_depth = min(fill.bar_depth, depth)
-    elif fill_type == "LOUVER":
-        # XXX keep louver depth less than window depth
-        fill = get_fill(prop, "louver_fill", dw)
-        depth = getattr(prop, "door_depth", getattr(prop, "window_depth", getattr(prop, "dw_depth", 1e10)))
-        fill.louver_depth = min(fill.louver_depth, depth)
 
 
 @map_new_faces(FaceMap.FRAME, skip=FaceMap.DOOR_PANELS)
@@ -119,7 +114,7 @@ def fill_panel(bm, face, prop):
     quads = subdivide_face_into_quads(bm, face, prop.panel_count_x, prop.panel_count_y)
 
     # XXX Ensure panel margin is less that size of each quad)
-    min_dimension = min(sum([calc_face_dimensions(q) for q in quads], ()))
+    min_dimension = min(sum((calc_face_dimensions(q) for q in quads), ()))
     prop.panel_margin = min(prop.panel_margin, min_dimension / 2)
 
     bmesh.ops.inset_individual(bm, faces=quads, thickness=prop.panel_margin, use_even_offset=True)
@@ -147,7 +142,7 @@ def fill_glass_panes(bm, face, prop, user=FillUser.DOOR):
     quads = subdivide_face_into_quads(bm, face, prop.pane_count_x, prop.pane_count_y)
 
     # XXX Ensure pane margin is less that size of each quad)
-    min_dimension = min(sum([calc_face_dimensions(q) for q in quads], ()))
+    min_dimension = min(sum((calc_face_dimensions(q) for q in quads), ()))
     prop.pane_margin = min(prop.pane_margin, min_dimension / 2)
 
     inset = map_new_faces(userframe)(bmesh.ops.inset_individual)

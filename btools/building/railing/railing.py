@@ -209,9 +209,9 @@ def edge_to_cylinder(bm, edge, radius, up, n=4, fill=False):
     dir = up.copy()
     dir.rotate(Quaternion(edge_vec, -math.pi + theta / 2).to_euler())
     bmesh.ops.translate(bm, verts=edge.verts, vec=dir * radius / math.sin(theta / 2))
-    all_verts = [v for v in edge.verts]
+    all_verts = list(edge.verts)
     dir.rotate(Quaternion(edge_vec, math.pi - theta / 2).to_euler())
-    for i in range(0, n):
+    for _ in range(0, n):
         ret = bmesh.ops.extrude_edge_only(bm, edges=[edge])
         edge = filter_geom(ret["geom"], BMEdge)[0]
         bmesh.ops.translate(bm, verts=edge.verts, vec=dir * length)

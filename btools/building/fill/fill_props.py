@@ -240,6 +240,5 @@ class FillProperty(bpy.types.PropertyGroup):
             "GLASS_PANES": self.glass_fill,
             "BAR": self.bar_fill,
         }
-        fill = fill_map.get(self.fill_type)
-        if fill:
+        if fill := fill_map.get(self.fill_type):
             fill.draw(box)

@@ -80,7 +80,7 @@ def dict_from_prop(prop):
             result[p] = pn
         elif isinstance(pn, bpy.types.PropertyGroup) and not isinstance(pn, type(prop)):
             # property group within this property
-            result.update(dict_from_prop(pn))
+            result |= dict_from_prop(pn)
     return result
 
 
@@ -125,8 +125,7 @@ def restricted_offset(parent_dimensions, size, offset):
 def local_to_global(face, vec):
     """Convert vector from local to global space, considering face normal as local z and world z as local y"""
     x, y, z = local_xyz(face)
-    global_offset = (x * vec.x) + (y * vec.y) + (z * vec.z)
-    return global_offset
+    return (x * vec.x) + (y * vec.y) + (z * vec.z)
 
 
 def local_xyz(face):
@@ -155,13 +154,12 @@ def get_scaled_unit(value):
 
 
 def get_defaults(prop):
-    defaults = dict()
-    for name, data in prop.__annotations__.items():
-        if data.function == PointerProperty:
-            defaults[name] = get_defaults(getattr(prop, name))
-        else:
-            defaults[name] = data.keywords.get('default')
-
+    defaults = {
+        name: get_defaults(getattr(prop, name))
+        if data.function == PointerProperty
+        else data.keywords.get('default')
+        for name, data in prop.__annotations__.items()
+    }
     for name in list(defaults.keys()):
         data = defaults[name] 
         if isinstance(data, dict):

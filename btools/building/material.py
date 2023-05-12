@@ -60,7 +60,7 @@ class BTOOLS_OT_create_facemap_material(bpy.types.Operator):
         active_facemap = obj.face_maps[obj.face_maps.active_index]
 
         # -- create new material
-        mat = create_object_material(obj, "mat_" + active_facemap.name)
+        mat = create_object_material(obj, f"mat_{active_facemap.name}")
         mat_id = [idx for idx, m in enumerate(obj.data.materials) if m == mat].pop()
         obj.active_material_index = mat_id  # make the new material active
 

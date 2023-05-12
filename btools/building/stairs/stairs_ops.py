@@ -55,7 +55,4 @@ def add_stairs_facemaps():
 
 
 def validate_stair_faces(faces):
-    if faces:
-        if not any([round(f.normal.z, 1) for f in faces]):
-            return True
-    return False
+    return bool(faces and not any(round(f.normal.z, 1) for f in faces))

@@ -61,7 +61,7 @@ class TestFloor(unittest.TestCase):
 
         # Build random shapes
         prop.type = "RANDOM"
-        for s in range(25):
+        for _ in range(25):
             prop.seed = random.randrange(0, 10000)
             res = floorplan_builder(context, prop)
 

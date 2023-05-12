@@ -24,8 +24,8 @@ class Road:
     @crash_safe
     def build(cls, context, prop):
         """Create road object"""
-        name = "road_" + str("{:0>3}".format(len(bpy.data.objects) + 1))
-        obj = create_object(name, create_mesh(name + "_mesh"))
+        name = "road_" + "{:0>3}".format(len(bpy.data.objects) + 1)
+        obj = create_object(name, create_mesh(f"{name}_mesh"))
         link_obj(obj)
 
         # Create outline
@@ -77,9 +77,8 @@ class Road:
                 bm.verts.new(Vector((-prop.width / 2 - prop.shoulder_width, 0, prop.sidewalk_height)))
 
             bm.verts.new(Vector((-prop.width / 2 - prop.shoulder_width, 0, 0)))
-        else:
-            if prop.generate_left_sidewalk:
-                bm.verts.new(Vector((-prop.width / 2, 0, prop.sidewalk_height)))
+        elif prop.generate_left_sidewalk:
+            bm.verts.new(Vector((-prop.width / 2, 0, prop.sidewalk_height)))
 
         # Main road
         bm.verts.new(Vector((-prop.width / 2, 0, 0)))
@@ -91,9 +90,8 @@ class Road:
 
             if prop.generate_right_sidewalk:
                 bm.verts.new(Vector((prop.width / 2 + prop.shoulder_width, 0, prop.sidewalk_height)))
-        else:
-            if prop.generate_right_sidewalk:
-                bm.verts.new(Vector((prop.width / 2, 0, prop.sidewalk_height)))
+        elif prop.generate_right_sidewalk:
+            bm.verts.new(Vector((prop.width / 2, 0, prop.sidewalk_height)))
 
         # Left sidewalk top
         if prop.generate_right_sidewalk:
@@ -114,7 +112,7 @@ class Road:
     @classmethod
     def create_curve(cls, context):
         # Create curve
-        name = "curve_" + str("{:0>3}".format(len(bpy.data.objects) + 1))
+        name = "curve_" + "{:0>3}".format(len(bpy.data.objects) + 1)
         curve_data = bpy.data.curves.new(name=name, type='CURVE')
         curve_data.dimensions = '3D'
         curve_data.resolution_u = 500
@@ -147,9 +145,7 @@ class Road:
         groups = [FaceMap.ROAD]
 
         if prop.generate_left_sidewalk or prop.generate_right_sidewalk:
-            groups.append(FaceMap.SIDEWALK)
-            groups.append(FaceMap.SIDEWALK_SIDE)
-
+            groups.extend((FaceMap.SIDEWALK, FaceMap.SIDEWALK_SIDE))
         if not prop.generate_left_sidewalk or not prop.generate_right_sidewalk:
             groups.append(FaceMap.SHOULDER_EXTENSION)
 
@@ -279,9 +275,7 @@ class Road:
             ) / 2  # Calculate center of road
             total_distance += (last_position - current_position).length
 
-            for j in range(count):
-                uv_coords.append((j % 2, total_distance * texture_scale))
-
+            uv_coords.extend((j % 2, total_distance * texture_scale) for j in range(count))
             last_position = current_position
 
         # Set uvs

@@ -59,8 +59,7 @@ def add_roof_facemaps():
 
 
 def validate_roof_faces(bm):
-    faces = [f for f in bm.faces if f.select]
-    if faces:
-        if all([round(f.normal.z, 1) for f in faces]):
+    if faces := [f for f in bm.faces if f.select]:
+        if all(round(f.normal.z, 1) for f in faces):
             return True
     return False

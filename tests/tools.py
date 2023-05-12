@@ -48,8 +48,7 @@ class LoadModule:
         for root, dirs, files in os.walk(dirname, topdown=True):
             if '__init__.py' in files:
                 paths.append(root)
-                for f in files:
-                    filepaths.append(os.path.join(root, f))
+                filepaths.extend(os.path.join(root, f) for f in files)
             else:
                 dirs[:] = []  # No __init__ so we stop walking this dir.
 

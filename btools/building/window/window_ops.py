@@ -40,8 +40,9 @@ def build(context, prop):
     verify_facemaps_for_object(context.object)
     me = get_edit_mesh()
     bm = bmesh.from_edit_mesh(me)
-    faces = validate_window_faces([face for face in bm.faces if face.select])
-    if faces:
+    if faces := validate_window_faces(
+        [face for face in bm.faces if face.select]
+    ):
         add_window_facemaps()
         if create_window(bm, faces, prop):
             bmesh.update_edit_mesh(me, loop_triangles=True)

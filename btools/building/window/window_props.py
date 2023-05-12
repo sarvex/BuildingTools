@@ -138,6 +138,5 @@ class WindowProperty(bpy.types.PropertyGroup, ArrayGetSet, SizeOffsetGetSet):
                 "LOUVER": self.louver_fill,
                 "GLASS_PANES": self.glass_fill,
             }
-            fill = fill_map.get(self.fill_type)
-            if fill:
+            if fill := fill_map.get(self.fill_type):
                 fill.draw(box)

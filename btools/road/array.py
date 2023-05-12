@@ -59,7 +59,7 @@ class Array:
     @classmethod
     def create_curve(cls, context):
         # Create curve
-        name = "curve_" + str("{:0>3}".format(len(bpy.data.objects) + 1))
+        name = "curve_" + "{:0>3}".format(len(bpy.data.objects) + 1)
         curve_data = bpy.data.curves.new(name=name, type='CURVE')
         curve_data.dimensions = '3D'
         curve_data.resolution_u = 500
@@ -81,8 +81,8 @@ class Array:
     @classmethod
     def create_plane(cls, context, curve):
         # Create plane
-        name = "plane_" + str("{:0>3}".format(len(bpy.data.objects) + 1))
-        obj = create_object(name, create_mesh(name + "_mesh"))
+        name = "plane_" + "{:0>3}".format(len(bpy.data.objects) + 1)
+        obj = create_object(name, create_mesh(f"{name}_mesh"))
         bm = bm_from_obj(obj)
 
         plane(bm, context.active_object.dimensions.y / 2, context.active_object.dimensions.x / 2)

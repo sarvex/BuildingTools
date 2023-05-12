@@ -43,22 +43,29 @@ upto = args[0]
 earliest = git("rev-list", "--reverse", upto).split(b"\n")[0].strip().decode()
 
 basename = "building_tools"
-outfilename = "%s-%s.zip" % (basename, upto)
+outfilename = f"{basename}-{upto}.zip"
 out = zipfile.ZipFile(outfilename, "x")
 for item in REPO_FILES:
     if item.endswith("/"):
         items = sorted(
-            set(
+            {
                 line.rsplit("\t", 1)[1]
                 for line in git("log", "--raw", item).decode().split("\n")
                 if line.startswith(":")
-            )
+            }
         )
     else:
         items = (item,)
 
     for filename in items:
-        info = git("log", "--format=%ct:%H", "-n1", "%s..%s" % (earliest, upto), "--", filename).strip()
+        info = git(
+            "log",
+            "--format=%ct:%H",
+            "-n1",
+            f"{earliest}..{upto}",
+            "--",
+            filename,
+        ).strip()
 
         if info != b"":
             item = zipfile.ZipInfo()
